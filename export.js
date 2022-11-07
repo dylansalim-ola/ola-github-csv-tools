@@ -104,7 +104,7 @@ const defaultExportColumns = (data) => {
       updated_at: issueObject.updated_at,
       closed_at: issueObject.closed_at !== null ? issueObject.closed_at : "",
       body: issueObject.body,
-      url: issueObject.url
+      url: issueObject.html_url
     };
     if (issueObject.user) {
       ret.user = issueObject.user.login;
@@ -237,7 +237,7 @@ const exportIssues = (octokit, values) => {
         (fileName) => {
           console.log(`Success! check ${fileName}`);
           console.log(
-            "❤ ❗ If this project has provided you value, please ⭐ star the repo to show your support: ➡ https://github.com/gavinr/github-csv-tools"
+            "❤ ❗ If this project has provided you value, please ⭐ star the repo to show your support: ➡ https://github.com/dylansalim-ola/ola-github-csv-tools and kudos to the original author ➡ https://github.com/gavinr/github-csv-tools"
           );
           process.exit(0);
         },
