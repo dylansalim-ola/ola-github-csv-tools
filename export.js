@@ -104,6 +104,7 @@ const defaultExportColumns = (data) => {
       updated_at: issueObject.updated_at,
       closed_at: issueObject.closed_at !== null ? issueObject.closed_at : "",
       body: issueObject.body,
+      url: issueObject.url
     };
     if (issueObject.user) {
       ret.user = issueObject.user.login;
@@ -163,13 +164,36 @@ const specificAttributeColumns = (data, attributes) => {
   });
 };
 
+const filterSpecificAttributeColumns = (data, attributes) => {
+  return data.filter((issueObject) => {
+    let isMatched = true;
+    attributes.forEach((attribute) => {
+      if (attribute.indexOf(":") > 0) {
+          const [key, value] = attribute.split(':').map(i => i.trim());
+          if(issueObject[key] != null && issueObject[key] !== value) {
+            isMatched = false;
+          }
+      }
+    });
+    return isMatched;
+  });
+};
+
 const exportIssues = (octokit, values) => {
   // Getting all the issues:
   const options = octokit.issues.listForRepo.endpoint.merge({
     owner: values.userOrOrganization,
     repo: values.repo,
-    state: "all",
+    state: values.state,
+    assignee: '*',
+    milestone: '*'
   });
+  if(values.since) {
+    options.since = values.since;
+  }
+  if(values.labels) {
+    options.labels = values.labels;
+  }
   octokit.paginate(options).then(
     async (data) => {
       // default export - columns that are compatible to be imported into GitHub
@@ -179,6 +203,8 @@ const exportIssues = (octokit, values) => {
         filteredData = data;
       } else if (values.exportAttributes) {
         filteredData = specificAttributeColumns(data, values.exportAttributes);
+      } else if (values.filterAttributes) {
+        filteredData = filterSpecificAttributeColumns(filteredData, values.filterAttributes);
       }
 
       // Add on comments, if requested.
